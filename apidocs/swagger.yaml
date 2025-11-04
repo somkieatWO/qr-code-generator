@@ -1,0 +1,42 @@
+basePath: /
+info:
+  contact: {}
+  description: API for generating QR codes with optional icon overlay
+  title: QR Code Generator API
+  version: "1.0"
+paths:
+  /qr:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Generates a QR code PNG for the provided text with optional icon
+        and custom size
+      parameters:
+      - description: Text or URL to encode
+        in: formData
+        name: text
+        required: true
+        type: string
+      - description: Center icon image (PNG/JPG/GIF)
+        in: formData
+        name: icon
+        type: file
+      - description: QR pixel size (64-2048)
+        in: formData
+        name: size
+        type: integer
+      produces:
+      - image/png
+      responses:
+        "200":
+          description: QR code image
+          schema:
+            type: file
+        "400":
+          description: Error message
+          schema:
+            type: string
+      summary: Generate QR code
+      tags:
+      - qr
+swagger: "2.0"

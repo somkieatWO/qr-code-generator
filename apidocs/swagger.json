@@ -1,0 +1,62 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API for generating QR codes with optional icon overlay",
+        "title": "QR Code Generator API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/",
+    "paths": {
+        "/qr": {
+            "post": {
+                "description": "Generates a QR code PNG for the provided text with optional icon and custom size",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "image/png"
+                ],
+                "tags": [
+                    "qr"
+                ],
+                "summary": "Generate QR code",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Text or URL to encode",
+                        "name": "text",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Center icon image (PNG/JPG/GIF)",
+                        "name": "icon",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "QR pixel size (64-2048)",
+                        "name": "size",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "QR code image",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
