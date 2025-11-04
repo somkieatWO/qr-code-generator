@@ -60,31 +60,4 @@
         }
     }
 }
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>QR Code Generator API Docs</title>
-  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
-  <style>body { margin:0; background:#fafafa; } .topbar{display:none}</style>
-</head>
-<body>
-  <div id="swagger-ui"></div>
-  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin></script>
-  <script>
-    window.onload = () => {
-      // If you deploy the backend elsewhere, adjust "url" to that public swagger.json or /swagger/doc.json endpoint.
-      // For now we use the local static copy (docs/swagger.json)
-      const ui = SwaggerUIBundle({
-        url: './swagger.json',
-        dom_id: '#swagger-ui',
-        deepLinking: true,
-        presets: [SwaggerUIBundle.presets.apis],
-        layout: 'BaseLayout'
-      });
-      window.ui = ui;
-    };
-  </script>
-</body>
-</html>
 
