@@ -14,14 +14,9 @@
       const params = new URLSearchParams(window.location.search);
       const userSpec = params.get('spec');
 
-      // Compute a robust default location for the spec so it works whether Pages
-      // publishes the "docs" folder at the site root or you access it via /docs/.
-      // If the current path includes "/docs/", look one directory up for swagger.json; otherwise use the same directory.
-      const inDocsPath = window.location.pathname.includes('/docs/');
-      const baseSpecPath = inDocsPath ? '../swagger.json' : './swagger.json';
-
+      // Default to local docs/swagger.json (the spec is hosted alongside this page)
       // Add cache-busting to avoid GitHub Pages serving stale content
-      const defaultSpec = baseSpecPath + '?v=' + Date.now();
+      const defaultSpec = './swagger.json?v=' + Date.now();
       const specUrl = userSpec || defaultSpec;
 
       const ui = SwaggerUIBundle({
