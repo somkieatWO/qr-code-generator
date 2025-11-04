@@ -16,7 +16,7 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/qr": {
-            "get": {
+            "post": {
                 "description": "Generates a QR code PNG for the provided text with optional icon and custom size",
                 "consumes": [
                     "multipart/form-data"
@@ -47,25 +47,6 @@ const docTemplate = `{
                         "description": "QR pixel size (64-2048)",
                         "name": "size",
                         "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Text or URL to encode",
-                        "name": "text",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Center icon image URL (PNG/JPG/GIF)",
-                        "name": "iconUrl",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "QR pixel size (64-2048)",
-                        "name": "size",
-                        "in": "query"
                     }
                 ],
                 "responses": {

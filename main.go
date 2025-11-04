@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
+	"strings"
 
 	httpSwagger "github.com/swaggo/http-swagger"
 
@@ -23,9 +25,15 @@ func main() {
 	mux.HandleFunc("/qr", h.GenerateQR)
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 
-	server := &http.Server{Addr: ":8080", Handler: mux}
-	log.Println("QR code generator server listening on :8080")
-	log.Println("Swagger UI available at http://localhost:8080/swagger/index.html")
+	// Render (and many PaaS) inject PORT env var; fall back to 8080 for local dev
+	port := strings.TrimSpace(os.Getenv("PORT"))
+	if port == "" {
+		port = "8080"
+	}
+	addr := ":" + port
+	server := &http.Server{Addr: addr, Handler: mux}
+	log.Printf("QR code generator server listening on %s", addr)
+	log.Printf("Swagger UI available at http://localhost:%s/swagger/index.html", port)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("server error: %v", err)
 	}
