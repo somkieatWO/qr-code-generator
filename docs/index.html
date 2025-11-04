@@ -10,15 +10,51 @@
   <div id="swagger-ui"></div>
   <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin></script>
   <script>
-    window.onload = () => {
+    window.onload = async () => {
       const params = new URLSearchParams(window.location.search);
       const userSpec = params.get('spec');
+      const overrideHost = params.get('host'); // e.g., api.example.com:443 or localhost:8080
+      const overrideSchemes = params.get('schemes'); // e.g., https or http,https
+      const overrideBasePath = params.get('basePath'); // e.g., /
 
       // Default to local docs/swagger.json (the spec is hosted alongside this page)
       // Add cache-busting to avoid GitHub Pages serving stale content
       const defaultSpec = './swagger.json?v=' + Date.now();
       const specUrl = userSpec || defaultSpec;
 
+      // If any override is provided, fetch the spec JSON, mutate, and pass as object.
+      try {
+        if (overrideHost || overrideSchemes || overrideBasePath) {
+          const resp = await fetch(specUrl, { cache: 'no-store' });
+          const specObj = await resp.json();
+
+          if (overrideHost) {
+            // Remove protocol if user included it
+            specObj.host = overrideHost.replace(/^https?:\/\//i, '');
+          }
+          if (overrideSchemes) {
+            specObj.schemes = overrideSchemes.split(',').map(s => s.trim()).filter(Boolean);
+          }
+          if (overrideBasePath) {
+            specObj.basePath = overrideBasePath;
+          }
+
+          const ui = SwaggerUIBundle({
+            spec: specObj,
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [SwaggerUIBundle.presets.apis],
+            layout: 'BaseLayout'
+          });
+          window.ui = ui;
+          return;
+        }
+      } catch (e) {
+        console.error('Failed to apply spec overrides:', e);
+        // Fallback to URL-based init below
+      }
+
+      // Default initialization: load by URL without overrides
       const ui = SwaggerUIBundle({
         url: specUrl,
         dom_id: '#swagger-ui',
