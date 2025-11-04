@@ -30,6 +30,16 @@ func NewQRHandler(qr *usecase.QRGenerator) *QRHandler { return &QRHandler{qr: qr
 // @Failure 400 {string} string "Error message"
 // @Router /qr [post]
 func (h *QRHandler) GenerateQR(w http.ResponseWriter, r *http.Request) {
+	// CORS headers (adjust origin in production)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+	if r.Method == http.MethodOptions { // preflight
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		_, _ = w.Write([]byte("method not allowed; use POST"))
