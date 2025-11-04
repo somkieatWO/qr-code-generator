@@ -4,9 +4,15 @@
   <meta charset="UTF-8" />
   <title>QR Code Generator API Docs</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
-  <style>body { margin:0; background:#fafafa; } .topbar{display:none}</style>
+  <style>
+    body { margin:0; background:#fafafa; }
+    .topbar{display:none}
+    .notice { padding: 10px 16px; background: #fff3cd; color: #856404; border-bottom: 1px solid #ffeeba; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+    .notice code { background: #fff; padding: 1px 4px; border: 1px solid #ffe8a1; border-radius: 3px; }
+  </style>
 </head>
 <body>
+  <div id="notice" class="notice" style="display:none"></div>
   <div id="swagger-ui"></div>
   <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" crossorigin></script>
   <script>
@@ -17,10 +23,40 @@
       const overrideSchemes = params.get('schemes'); // e.g., https or http,https
       const overrideBasePath = params.get('basePath'); // e.g., /
 
+      const isGithubPages = /\.github\.io$/i.test(window.location.hostname);
+
+      // If on GitHub Pages, show a friendly warning about POST restrictions
+      if (isGithubPages && !overrideHost) {
+        const n = document.getElementById('notice');
+        n.style.display = 'block';
+        n.innerHTML = "GitHub Pages is a static host and blocks non-GET requests (like POST). 'Try it out' will fail here with 405. To test against a real server, pass query params like <code>?host=localhost:8080&schemes=http</code> and run the API locally, or deploy your API elsewhere.";
+      }
+
       // Default to local docs/swagger.json (the spec is hosted alongside this page)
       // Add cache-busting to avoid GitHub Pages serving stale content
       const defaultSpec = './swagger.json?v=' + Date.now();
       const specUrl = userSpec || defaultSpec;
+
+      // Common Swagger UI options with an interceptor to block POSTs to github.io itself
+      const commonOptions = {
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [SwaggerUIBundle.presets.apis],
+        layout: 'BaseLayout',
+        requestInterceptor: (req) => {
+          try {
+            const method = (req.method || 'GET').toUpperCase();
+            const target = new URL(req.url, window.location.href);
+            const sameOrigin = target.origin === window.location.origin;
+            if (isGithubPages && sameOrigin && method !== 'GET') {
+              throw new Error('Blocked: GitHub Pages does not allow ' + method + ' to this host. Use ?host=your-api.example&schemes=https (or localhost:8080 with http).');
+            }
+          } catch (e) {
+            // If URL parsing fails, let it through; the request will likely fail and show in UI
+          }
+          return req;
+        }
+      };
 
       // If any override is provided, fetch the spec JSON, mutate, and pass as object.
       try {
@@ -39,13 +75,7 @@
             specObj.basePath = overrideBasePath;
           }
 
-          const ui = SwaggerUIBundle({
-            spec: specObj,
-            dom_id: '#swagger-ui',
-            deepLinking: true,
-            presets: [SwaggerUIBundle.presets.apis],
-            layout: 'BaseLayout'
-          });
+          const ui = SwaggerUIBundle(Object.assign({ spec: specObj }, commonOptions));
           window.ui = ui;
           return;
         }
@@ -68,13 +98,7 @@
             if (!specObj.basePath || specObj.basePath === '/') {
               specObj.basePath = desiredBasePath;
             }
-            const ui = SwaggerUIBundle({
-              spec: specObj,
-              dom_id: '#swagger-ui',
-              deepLinking: true,
-              presets: [SwaggerUIBundle.presets.apis],
-              layout: 'BaseLayout'
-            });
+            const ui = SwaggerUIBundle(Object.assign({ spec: specObj }, commonOptions));
             window.ui = ui;
             return;
           }
@@ -85,13 +109,7 @@
       }
 
       // Default initialization: load by URL without overrides
-      const ui = SwaggerUIBundle({
-        url: specUrl,
-        dom_id: '#swagger-ui',
-        deepLinking: true,
-        presets: [SwaggerUIBundle.presets.apis],
-        layout: 'BaseLayout'
-      });
+      const ui = SwaggerUIBundle(Object.assign({ url: specUrl }, commonOptions));
       window.ui = ui;
     };
   </script>

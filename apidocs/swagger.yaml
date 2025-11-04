@@ -6,7 +6,7 @@ info:
   version: "1.0"
 paths:
   /qr:
-    post:
+    get:
       consumes:
       - multipart/form-data
       description: Generates a QR code PNG for the provided text with optional icon
@@ -23,6 +23,19 @@ paths:
         type: file
       - description: QR pixel size (64-2048)
         in: formData
+        name: size
+        type: integer
+      - description: Text or URL to encode
+        in: query
+        name: text
+        required: true
+        type: string
+      - description: Center icon image URL (PNG/JPG/GIF)
+        in: query
+        name: iconUrl
+        type: string
+      - description: QR pixel size (64-2048)
+        in: query
         name: size
         type: integer
       produces:

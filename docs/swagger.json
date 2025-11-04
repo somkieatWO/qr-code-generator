@@ -9,6 +9,51 @@
     "basePath": "/",
     "paths": {
         "/qr": {
+            "get": {
+                "description": "Generates a QR code PNG for the provided text with optional icon and custom size",
+                "produces": [
+                    "image/png"
+                ],
+                "tags": [
+                    "qr"
+                ],
+                "summary": "Generate QR code (GET)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Text or URL to encode",
+                        "name": "text",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Center icon image URL (PNG/JPG/GIF)",
+                        "name": "iconUrl",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "QR pixel size (64-2048)",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "QR code image",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Generates a QR code PNG for the provided text with optional icon and custom size",
                 "consumes": [
@@ -20,7 +65,7 @@
                 "tags": [
                     "qr"
                 ],
-                "summary": "Generate QR code",
+                "summary": "Generate QR code (POST)",
                 "parameters": [
                     {
                         "type": "string",
