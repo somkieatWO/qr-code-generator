@@ -51,6 +51,36 @@
         }
       } catch (e) {
         console.error('Failed to apply spec overrides:', e);
+        // Fallback to auto basePath or URL-based init below
+      }
+
+      // Auto-adjust basePath when hosted under a GitHub Pages project path (e.g., /qr-code-generator/)
+      try {
+        if (!overrideHost && !overrideSchemes && !overrideBasePath) {
+          const pathParts = window.location.pathname.split('/').filter(Boolean);
+          // Expect first segment to be the project name when using project Pages
+          const first = pathParts[0];
+          const desiredBasePath = first ? ('/' + first) : '/';
+          // Only attempt if desired base path is not root and not just 'docs'
+          if (desiredBasePath !== '/' && first !== 'docs') {
+            const resp = await fetch(specUrl, { cache: 'no-store' });
+            const specObj = await resp.json();
+            if (!specObj.basePath || specObj.basePath === '/') {
+              specObj.basePath = desiredBasePath;
+            }
+            const ui = SwaggerUIBundle({
+              spec: specObj,
+              dom_id: '#swagger-ui',
+              deepLinking: true,
+              presets: [SwaggerUIBundle.presets.apis],
+              layout: 'BaseLayout'
+            });
+            window.ui = ui;
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('Failed to apply auto basePath:', e);
         // Fallback to URL-based init below
       }
 
