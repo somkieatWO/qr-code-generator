@@ -25,7 +25,7 @@ func NewQRHandler(qr *usecase.QRGenerator) *QRHandler { return &QRHandler{qr: qr
 // @Accept multipart/form-data
 // @Produce image/png
 // @Param text formData string true "Text or URL to encode"
-// @Param type formData string false "Type of code to generate: 'qr' (default) or 'barcode'"
+// @Param type formData string false "Type of code to generate" Enums(qr, barcode) default(qr)
 // @Param icon formData file false "Center icon image (PNG/JPG/GIF) - QR code only"
 // @Param size formData int false "Pixel size (64-2048)"
 // @Success 200 {file} png "QR code or Barcode image"

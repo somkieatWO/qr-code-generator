@@ -37,8 +37,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "enum": [
+                            "qr",
+                            "barcode"
+                        ],
                         "type": "string",
-                        "description": "Type of code to generate: 'qr' (default) or 'barcode'",
+                        "default": "qr",
+                        "description": "Type of code to generate",
                         "name": "type",
                         "in": "formData"
                     },

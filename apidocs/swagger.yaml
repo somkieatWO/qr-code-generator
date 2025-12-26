@@ -17,7 +17,11 @@ paths:
         name: text
         required: true
         type: string
-      - description: 'Type of code to generate: ''qr'' (default) or ''barcode'''
+      - default: qr
+        description: Type of code to generate
+        enum:
+        - qr
+        - barcode
         in: formData
         name: type
         type: string
