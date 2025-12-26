@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/somkieatWO/qr-code-generator/internal/usecase"
 )
@@ -18,15 +19,16 @@ type QRHandler struct {
 func NewQRHandler(qr *usecase.QRGenerator) *QRHandler { return &QRHandler{qr: qr} }
 
 // GenerateQR godoc
-// @Summary Generate QR code
-// @Description Generates a QR code PNG for the provided text with optional icon and custom size
+// @Summary Generate QR code or Barcode
+// @Description Generates a QR code or Barcode PNG for the provided text with optional icon (QR only) and custom size
 // @Tags qr
 // @Accept multipart/form-data
 // @Produce image/png
 // @Param text formData string true "Text or URL to encode"
-// @Param icon formData file false "Center icon image (PNG/JPG/GIF)"
-// @Param size formData int false "QR pixel size (64-2048)"
-// @Success 200 {file} png "QR code image"
+// @Param type formData string false "Type of code to generate: 'qr' (default) or 'barcode'"
+// @Param icon formData file false "Center icon image (PNG/JPG/GIF) - QR code only"
+// @Param size formData int false "Pixel size (64-2048)"
+// @Success 200 {file} png "QR code or Barcode image"
 // @Failure 400 {string} string "Error message"
 // @Router /qr [post]
 func (h *QRHandler) GenerateQR(w http.ResponseWriter, r *http.Request) {
@@ -57,6 +59,17 @@ func (h *QRHandler) GenerateQR(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	codeType := r.FormValue("type")
+	if codeType == "" {
+		codeType = "qr"
+	}
+	codeType = strings.ToLower(codeType)
+
+	if codeType != "qr" && codeType != "barcode" {
+		http.Error(w, "invalid type, must be 'qr' or 'barcode'", http.StatusBadRequest)
+		return
+	}
+
 	// size handling
 	reqSize := h.qr.Size()
 	if sizeStr := r.FormValue("size"); sizeStr != "" {
@@ -77,27 +90,38 @@ func (h *QRHandler) GenerateQR(w http.ResponseWriter, r *http.Request) {
 		gen = usecase.NewQRGenerator(reqSize)
 	}
 
-	var iconBytes []byte
-	file, _, err := r.FormFile("icon")
-	if err == nil && file != nil {
-		defer file.Close()
-		iconBytes, err = io.ReadAll(file)
-		if err != nil {
-			log.Printf("read icon error: %v", err)
-			http.Error(w, "invalid icon file", http.StatusBadRequest)
-			return
+	var pngBytes []byte
+	var err error
+
+	if codeType == "barcode" {
+		pngBytes, err = gen.GenerateBarcode(text)
+	} else {
+		var iconBytes []byte
+		file, _, errFile := r.FormFile("icon")
+		if errFile == nil && file != nil {
+			defer file.Close()
+			iconBytes, errFile = io.ReadAll(file)
+			if errFile != nil {
+				log.Printf("read icon error: %v", errFile)
+				http.Error(w, "invalid icon file", http.StatusBadRequest)
+				return
+			}
 		}
+		pngBytes, err = gen.Generate(text, iconBytes)
 	}
 
-	pngBytes, err := gen.Generate(text, iconBytes)
 	if err != nil {
-		log.Printf("generate qr error: %v", err)
+		log.Printf("generate error: %v", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	w.Header().Set("Content-Type", "image/png")
-	w.Header().Set("Content-Disposition", "inline; filename=qr.png")
+	if codeType == "barcode" {
+		w.Header().Set("Content-Disposition", "inline; filename=barcode.png")
+	} else {
+		w.Header().Set("Content-Disposition", "inline; filename=qr.png")
+	}
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(pngBytes)
 }

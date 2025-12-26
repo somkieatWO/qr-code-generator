@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/qr": {
             "post": {
-                "description": "Generates a QR code PNG for the provided text with optional icon and custom size",
+                "description": "Generates a QR code or Barcode PNG for the provided text with optional icon (QR only) and custom size",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -27,7 +27,7 @@ const docTemplate = `{
                 "tags": [
                     "qr"
                 ],
-                "summary": "Generate QR code",
+                "summary": "Generate QR code or Barcode",
                 "parameters": [
                     {
                         "type": "string",
@@ -37,21 +37,27 @@ const docTemplate = `{
                         "required": true
                     },
                     {
+                        "type": "string",
+                        "description": "Type of code to generate: 'qr' (default) or 'barcode'",
+                        "name": "type",
+                        "in": "formData"
+                    },
+                    {
                         "type": "file",
-                        "description": "Center icon image (PNG/JPG/GIF)",
+                        "description": "Center icon image (PNG/JPG/GIF) - QR code only",
                         "name": "icon",
                         "in": "formData"
                     },
                     {
                         "type": "integer",
-                        "description": "QR pixel size (64-2048)",
+                        "description": "Pixel size (64-2048)",
                         "name": "size",
                         "in": "formData"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "QR code image",
+                        "description": "QR code or Barcode image",
                         "schema": {
                             "type": "file"
                         }

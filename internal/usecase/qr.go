@@ -6,6 +6,8 @@ import (
 	"image"
 	"image/png"
 
+	"github.com/boombuler/barcode"
+	"github.com/boombuler/barcode/code128"
 	"github.com/skip2/go-qrcode"
 	"golang.org/x/image/draw"
 )
@@ -56,6 +58,31 @@ func (g *QRGenerator) Generate(text string, iconData []byte) ([]byte, error) {
 
 	buf := &bytes.Buffer{}
 	if err := png.Encode(buf, img); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+// GenerateBarcode creates a Barcode PNG for the provided text.
+func (g *QRGenerator) GenerateBarcode(text string) ([]byte, error) {
+	if text == "" {
+		return nil, errors.New("text is required")
+	}
+
+	// Create the barcode
+	bc, err := code128.Encode(text)
+	if err != nil {
+		return nil, err
+	}
+
+	// Scale the barcode to the desired size
+	scaled, err := barcode.Scale(bc, g.size, g.size/2) // Width = size, Height = size/2
+	if err != nil {
+		return nil, err
+	}
+
+	buf := &bytes.Buffer{}
+	if err := png.Encode(buf, scaled); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil

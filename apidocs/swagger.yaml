@@ -9,19 +9,23 @@ paths:
     post:
       consumes:
       - multipart/form-data
-      description: Generates a QR code PNG for the provided text with optional icon
-        and custom size
+      description: Generates a QR code or Barcode PNG for the provided text with optional
+        icon (QR only) and custom size
       parameters:
       - description: Text or URL to encode
         in: formData
         name: text
         required: true
         type: string
-      - description: Center icon image (PNG/JPG/GIF)
+      - description: 'Type of code to generate: ''qr'' (default) or ''barcode'''
+        in: formData
+        name: type
+        type: string
+      - description: Center icon image (PNG/JPG/GIF) - QR code only
         in: formData
         name: icon
         type: file
-      - description: QR pixel size (64-2048)
+      - description: Pixel size (64-2048)
         in: formData
         name: size
         type: integer
@@ -29,14 +33,14 @@ paths:
       - image/png
       responses:
         "200":
-          description: QR code image
+          description: QR code or Barcode image
           schema:
             type: file
         "400":
           description: Error message
           schema:
             type: string
-      summary: Generate QR code
+      summary: Generate QR code or Barcode
       tags:
       - qr
 swagger: "2.0"
